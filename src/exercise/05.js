@@ -10,7 +10,6 @@ import {
   updateGridCellState,
 } from '../utils'
 
-const AppContext = React.createContext()
 const AppStateContext = React.createContext()
 const AppDispatchContext = React.createContext()
 
@@ -35,43 +34,19 @@ function appReducer(state, action) {
   }
 }
 
-function AppContextProvider({children}) {
+function AppProvider({children}) {
   const [state, dispatch] = React.useReducer(appReducer, {
     dogName: '',
     grid: initialGrid,
   })
 
-  const value = [state, dispatch]
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>
-}
-
-function AppStateProvider({children}) {
-  const [state] = useAppContext()
-  const value = React.useMemo(() => state, [state])
   return (
-    <AppStateContext.Provider value={value}>
-      {children}
+    <AppStateContext.Provider value={state}>
+      <AppDispatchContext.Provider value={dispatch}>
+        {children}
+      </AppDispatchContext.Provider>
     </AppStateContext.Provider>
   )
-}
-
-function AppDispatchProvider({children}) {
-  const [, dispatch] = useAppContext()
-  const value = dispatch
-  return (
-    <AppDispatchContext.Provider value={value}>
-      {children}
-    </AppDispatchContext.Provider>
-  )
-}
-
-function useAppContext() {
-  const context = React.useContext(AppContext)
-  if (!context) {
-    throw new Error('useAppContext must be used within the AppContextProvider')
-  }
-  return context
 }
 
 function useAppState() {
@@ -163,16 +138,12 @@ function App() {
   return (
     <div className="grid-app">
       <button onClick={forceRerender}>force rerender</button>
-      <AppContextProvider>
-        <AppDispatchProvider>
-          <AppStateProvider>
-            <div>
-              <DogNameInput />
-              <Grid />
-            </div>
-          </AppStateProvider>
-        </AppDispatchProvider>
-      </AppContextProvider>
+      <AppProvider>
+        <div>
+          <DogNameInput />
+          <Grid />
+        </div>
+      </AppProvider>
     </div>
   )
 }
