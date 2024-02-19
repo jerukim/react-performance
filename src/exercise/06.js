@@ -114,6 +114,7 @@ function Cell({row, column}) {
 
   return <CellImplementation cell={cell} row={row} column={column} />
 }
+Cell = React.memo(Cell)
 
 function CellImplementation({cell, row, column}) {
   const dispatch = useAppDispatch()
