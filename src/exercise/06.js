@@ -159,14 +159,14 @@ function App() {
   return (
     <div className="grid-app">
       <button onClick={forceRerender}>force rerender</button>
-      <AppProvider>
+      <div>
         <DogProvider>
-          <div>
-            <DogNameInput />
-            <Grid />
-          </div>
+          <DogNameInput />
         </DogProvider>
-      </AppProvider>
+        <AppProvider>
+          <Grid />
+        </AppProvider>
+      </div>
     </div>
   )
 }
