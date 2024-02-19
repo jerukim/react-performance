@@ -109,20 +109,16 @@ function Grid() {
 Grid = React.memo(Grid)
 
 function Cell({row, column}) {
-  const dispatch = useAppDispatch()
   const state = useAppState()
-
   const cell = state.grid[row][column]
 
-  const handleClick = React.useCallback(
-    () => dispatch({type: 'UPDATE_GRID_CELL', row, column}),
-    [dispatch, row, column],
-  )
-
-  return <CellImplementation cell={cell} handleClick={handleClick} />
+  return <CellImplementation cell={cell} row={row} column={column} />
 }
 
-function CellImplementation({cell, handleClick}) {
+function CellImplementation({cell, row, column}) {
+  const dispatch = useAppDispatch()
+  const handleClick = () => dispatch({type: 'UPDATE_GRID_CELL', row, column})
+
   return (
     <button
       className="cell"
