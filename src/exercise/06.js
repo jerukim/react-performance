@@ -10,6 +10,7 @@ import {
   updateGridCellState,
 } from '../utils'
 
+// ./context/App
 const AppStateContext = React.createContext()
 const AppDispatchContext = React.createContext()
 
@@ -32,9 +33,7 @@ function appReducer(state, action) {
 }
 
 function AppProvider({children}) {
-  const [state, dispatch] = React.useReducer(appReducer, {
-    grid: initialGrid,
-  })
+  const [state, dispatch] = React.useReducer(appReducer, {grid: initialGrid})
   return (
     <AppStateContext.Provider value={state}>
       <AppDispatchContext.Provider value={dispatch}>
@@ -56,6 +55,37 @@ function useAppDispatch() {
   const context = React.useContext(AppDispatchContext)
   if (!context) {
     throw new Error('useAppDispatch must be used within the AppProvider')
+  }
+  return context
+}
+
+// ./context/DogName
+const DogNameContext = React.createContext()
+
+function dogReducer(state, action) {
+  switch (action.type) {
+    case 'TYPED_IN_DOG_INPUT':
+      return {...state, dogName: action.dogName}
+    default: {
+      throw new Error(`Unhandled action type: ${action.type}`)
+    }
+  }
+}
+
+function DogProvider({children}) {
+  const [state, dispatch] = React.useReducer(dogReducer, {dogName: ''})
+
+  const value = [state, dispatch]
+
+  return (
+    <DogNameContext.Provider value={value}>{children}</DogNameContext.Provider>
+  )
+}
+
+function useDogName() {
+  const context = React.useContext(DogNameContext)
+  if (!context) {
+    throw new Error('useDogName must be used within the DogNameProvider')
   }
   return context
 }
@@ -99,11 +129,12 @@ function Cell({row, column}) {
 Cell = React.memo(Cell)
 
 function DogNameInput() {
-  const [dogName, setDogName] = React.useState()
+  const [state, dispatch] = useDogName()
+  const {dogName} = state
 
   function handleChange(event) {
     const newDogName = event.target.value
-    setDogName(newDogName)
+    dispatch({type: 'TYPED_IN_DOG_INPUT', dogName: newDogName})
   }
 
   return (
@@ -129,10 +160,12 @@ function App() {
     <div className="grid-app">
       <button onClick={forceRerender}>force rerender</button>
       <AppProvider>
-        <div>
-          <DogNameInput />
-          <Grid />
-        </div>
+        <DogProvider>
+          <div>
+            <DogNameInput />
+            <Grid />
+          </div>
+        </DogProvider>
       </AppProvider>
     </div>
   )
