@@ -5,6 +5,7 @@
 import * as React from 'react'
 import {useForceRerender, useDebouncedState, AppGrid} from '../utils'
 import {RecoilRoot, atomFamily, useRecoilState, useRecoilCallback} from 'recoil'
+import reportProfile from '../report-profile'
 
 const AppStateContext = React.createContext()
 
@@ -18,7 +19,8 @@ const cellAtoms = atomFamily({
 })
 
 function useUpdateGrid() {
-  return useRecoilCallback(({set}) => ({rows, columns}) => {
+  return useRecoilCallback(({set}) => data => {
+    const {rows, columns} = data
     for (let row = 0; row < rows; row++) {
       for (let column = 0; column < columns; column++) {
         if (Math.random() > 0.7) {
@@ -66,7 +68,7 @@ function Grid() {
   const [columns, setColumns] = useDebouncedState(50)
   return (
     <AppGrid
-      onUpdateGrid={updateGrid}
+      onUpdateGrid={() => updateGrid({rows, columns})}
       rows={rows}
       handleRowsChange={setRows}
       columns={columns}
@@ -125,14 +127,16 @@ function App() {
   return (
     <div className="grid-app">
       <button onClick={forceRerender}>force rerender</button>
-      <RecoilRoot>
-        <AppProvider>
-          <div>
-            <DogNameInput />
-            <Grid />
-          </div>
-        </AppProvider>
-      </RecoilRoot>
+      <React.Profiler id="Grid" onRender={reportProfile}>
+        <RecoilRoot>
+          <AppProvider>
+            <div>
+              <DogNameInput />
+              <Grid />
+            </div>
+          </AppProvider>
+        </RecoilRoot>
+      </React.Profiler>
     </div>
   )
 }
